@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "419536733053",
+    "project_id": "platemate-33df8",
+    "storage_bucket": "platemate-33df8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419536733053:android:14b43fcdd20550d175c214",
+        "android_client_info": {
+          "package_name": "com.example.platemate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApsqfsoEC9EuKzD-6LAireTeXJL8MElFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

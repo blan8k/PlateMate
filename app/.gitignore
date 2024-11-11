@@ -1,0 +1,25 @@
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.hprof
+
+# Log files
+*.log
+
+# Gitignore compiled code and other unnecessary files
+*.class
+*.apk
+*.jar
+*.war
+*.ear
+*.keystore
+
+# MacOS
+.DS_Store
