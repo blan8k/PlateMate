@@ -138,10 +138,9 @@ public class MainActivity extends AppCompatActivity {
                         Bitmap cropped = cropImage(photoFile);
                         File croppedImageFile = null;
                         try {
-                            // Create a new file for the cropped image
+
                             croppedImageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Cropped_Image.jpg");
 
-                            // Save the cropped bitmap to the file
                             FileOutputStream out = new FileOutputStream(croppedImageFile);
                             cropped.compress(Bitmap.CompressFormat.JPEG, 100, out);
                             out.flush();
@@ -150,15 +149,13 @@ public class MainActivity extends AppCompatActivity {
 
                         } catch (Exception e) {
                             e.printStackTrace();
-                            //Toast.makeText(this, "Failed to save cropped image", Toast.LENGTH_SHORT).show();
-                        }
+                             }
 
 
                         photoFile = croppedImageFile;
                         photoUri = FileProvider.getUriForFile(MainActivity.this,
                                 "com.example.platemate.fileprovider", photoFile);
 
-                        //displayCapturedImage();
                         uploadImageToFirebase(photoUri);
                     }
 
@@ -183,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayCapturedImage() {
-        // Return to main layout with image saved in ImageView
         setContentView(R.layout.activity_main);
         picture = findViewById(R.id.pictureID);
         picture.setImageURI(photoUri);
@@ -210,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 //                if (response.isSuccessful()) {
 //                    Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
 //                    try {
-//                        // Parse the API response
+//
 //                        String responseBody = response.body().string();
 //                        System.out.println("Response: " + responseBody);
 //                        try {
@@ -219,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 //                            JSONObject firstChoice = choices.getJSONObject(0);
 //                            JSONObject message = firstChoice.getJSONObject("message");
 //                            String assistantResponse = message.getString("content");
-//                            desc.setText(assistantResponse);  // Display in your TextView
+//                            desc.setText(assistantResponse);
 //                        } catch (JSONException e) {
 //                            e.printStackTrace();
 //                        }
@@ -229,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                } else {
 //                    try {
-//                        // Log the error body as a string
+//
 //                        String errorBody = response.errorBody().string();
 //                        Log.e("OpenAIError", "Error Body: INFINITE VOID123 " + errorBody);
 //                    } catch (IOException e) {
@@ -277,33 +273,33 @@ public class MainActivity extends AppCompatActivity {
     }
     private Bitmap cropImage(File imageFile) {
         try {
-            // Load the image as a Bitmap
+
             Bitmap fullImage = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 
-            // Correct the image orientation using ExifInterface
+
             ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
             int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
             int rotationInDegrees = exifToDegrees(rotation);
             fullImage = rotateImage(fullImage, rotationInDegrees);
 
-            // Get screen density to convert dp to pixels
+
             float density = getResources().getDisplayMetrics().density;
 
-            // Define cropping box dimensions (300dp to pixels)
+
             int boxWidth = (int) (600 * density);
             int boxHeight = (int) (600 * density);
 
-            // Center the box on the image
+
             int boxLeft = (fullImage.getWidth() - boxWidth) / 2;
             int boxTop = (fullImage.getHeight() - boxHeight) / 2;
 
-            // Ensure cropping area is within bounds
+
             boxLeft = Math.max(0, boxLeft);
             boxTop = Math.max(0, boxTop);
             boxWidth = Math.min(boxWidth, fullImage.getWidth() - boxLeft);
             boxHeight = Math.min(boxHeight, fullImage.getHeight() - boxTop);
 
-            // Crop the image
+
             Bitmap croppedBitmap = Bitmap.createBitmap(fullImage, boxLeft, boxTop, boxWidth, boxHeight);
 
             return croppedBitmap;
@@ -315,14 +311,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Helper to handle image rotation
+
     private Bitmap rotateImage(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-    // Helper to convert EXIF orientation to degrees
+
     private int exifToDegrees(int exifOrientation) {
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
             return 90;

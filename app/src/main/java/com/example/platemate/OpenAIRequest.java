@@ -6,7 +6,6 @@ import okhttp3.RequestBody;
 public class OpenAIRequest {
 
     public static RequestBody createRequestBody(String model, String userPrompt, String imageUrl) {
-        // Construct the JSON string with proper formatting for text and image_url
         String json = "{"
                 + "\"model\": \"" + model + "\","
                 + "\"messages\": ["
@@ -27,15 +26,13 @@ public class OpenAIRequest {
                 + "    }"
                 + "]"
                 + "}";
-
-        // Log the generated JSON for debugging
         System.out.println("Generated JSON: " + json);
 
-        // Return the JSON as a RequestBody
+
         return RequestBody.create(MediaType.parse("application/json"), json);
     }
 
-    // Helper method to escape special characters
+
     private static String escapeString(String input) {
         if (input == null) {
             return "";
