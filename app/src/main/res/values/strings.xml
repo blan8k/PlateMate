@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PlateMate</string>
+    <string name="default_web_client_id">419536733053-bttu1370r4lgbs75rkb4np80cbjjs080.apps.googleusercontent.com</string>
+
 </resources>
