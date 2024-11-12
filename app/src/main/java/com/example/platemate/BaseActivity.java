@@ -48,13 +48,23 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        if (savedInstanceState == null) { // Ensure this only happens on initial load
-            navigationView.setCheckedItem(R.id.nav_home);
-            startActivity(new Intent(BaseActivity.this, takePhoto.class));
-            finish();
+        // Only redirect to takePhoto on the initial app launch
+        if (getIntent().getBooleanExtra("FROM_NAVIGATION", false)) {
+            // Skip redirection if this is a navigation action
+            return;
         }
-    }
+        if (!(this instanceof takePhoto) && savedInstanceState == null ) {
+            first();
+        }
 
+    }
+    private void first(){
+        Intent intent = new Intent(this, takePhoto.class);
+        intent.putExtra("FROM_NAVIGATION", true); // Add a flag to prevent repeated redirection
+        startActivity(intent);
+        finish();
+
+    }
     // This method must be overridden in child activities to provide their specific layout
     protected int getContentViewId() {
         throw new UnsupportedOperationException("You must override getContentViewId() in child classes.");
@@ -64,11 +74,14 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            startActivity(new Intent(BaseActivity.this, takePhoto.class));
-            finish();
-            } else if (id == R.id.nav_settings) {
-            startActivity(new Intent(BaseActivity.this, History.class));
-            finish();
+            Intent intent = new Intent(this, takePhoto.class);
+            intent.putExtra("FROM_NAVIGATION", true); // Add flag to prevent redirection loop
+            startActivity(intent);
+
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, History.class);
+            intent.putExtra("FROM_NAVIGATION", true); // Add flag to prevent redirection loop
+            startActivity(intent);
             } else if (id == R.id.nav_about) {
             FirebaseAuth.getInstance().signOut();
             GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
