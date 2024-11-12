@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".takePhoto">
 
     <!-- ImageView to display captured image -->
     <ImageView
@@ -27,6 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- ScrollView for displaying text -->
     <ScrollView
         android:id="@+id/scrollView2"
         android:layout_width="300dp"
@@ -53,13 +54,11 @@ Fats: 20 g
 Saturated Fat: 3 g
 Confidence Level
 Confidence Level: High
-If you have specific brand information or additional details, I can refine the estimates.
-
-"
+If you have specific brand information or additional details, I can refine the estimates."
             android:textSize="20dp" />
-
     </ScrollView>
 
+    <!-- EditText for user input -->
     <EditText
         android:id="@+id/editTextText"
         android:layout_width="wrap_content"
@@ -73,6 +72,7 @@ If you have specific brand information or additional details, I can refine the e
         app:layout_constraintHorizontal_bias="0.079"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Button to trigger saving or other actions -->
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
@@ -81,6 +81,4 @@ If you have specific brand information or additional details, I can refine the e
         android:text="Button"
         app:layout_constraintBottom_toTopOf="@+id/scrollView2"
         app:layout_constraintStart_toEndOf="@+id/editTextText" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

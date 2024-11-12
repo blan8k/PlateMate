@@ -12,29 +12,23 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.Button;
@@ -44,10 +38,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,12 +50,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
 //YES
-public class MainActivity extends AppCompatActivity {
+public class takePhoto extends BaseActivity {
     private PreviewView previewView;
     private ImageCapture imageCapture;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -85,12 +72,18 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private Button save;
     private EditText et;
+    private DrawerLayout drawerLayout;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.takephoto);
+        setUpNavigationDrawer(R.layout.base);
+
+        // Inflate History-specific layout into the content frame
+        getLayoutInflater().inflate(R.layout.takephoto, findViewById(R.id.content_frame));
 
         picture = findViewById(R.id.pictureID);
         cameraButton = findViewById(R.id.camera_button);
@@ -101,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
         cameraButton.setOnClickListener(v -> openCameraActivity());
         save.setOnClickListener(v -> saveToFirebase());
+        drawerLayout = findViewById(R.id.drawer_layout);
 
 
     }
@@ -232,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                         photoFile = croppedImageFile;
-                        photoUri = FileProvider.getUriForFile(MainActivity.this,
+                        photoUri = FileProvider.getUriForFile(takePhoto.this,
                                 "com.example.platemate.fileprovider", photoFile);
 
                         uploadImageToFirebase(photoUri);
@@ -241,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         Log.e("MainActivity", "Photo capture failed: " + exception.getMessage(), exception);
-                        Toast.makeText(MainActivity.this, "Photo capture failed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(takePhoto.this, "Photo capture failed", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -259,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayCapturedImage() {
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.takephoto);
         picture = findViewById(R.id.pictureID);
         picture.setImageURI(photoUri);
         imageFile = new File(photoFile.getAbsolutePath());

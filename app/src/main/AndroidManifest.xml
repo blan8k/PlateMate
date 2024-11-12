@@ -41,8 +41,13 @@
         </activity>
 
         <!-- Other activities -->
-        <activity android:name=".MainActivity"
+        <activity android:name=".takePhoto"
             android:exported="false"/>
+        <activity android:name=".BaseActivity"
+            android:exported="false"/>
+        <activity android:name=".History"
+            android:exported="false"/>
+
     </application>
 
 
