@@ -13,15 +13,24 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,6 +38,7 @@ import android.provider.MediaStore;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +54,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.RequestBody;
@@ -68,6 +81,12 @@ public class MainActivity extends AppCompatActivity {
     private File photoFile;
     private String timeStamp;
     private String imageFileName;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private Button save;
+    private EditText et;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,9 +94,69 @@ public class MainActivity extends AppCompatActivity {
 
         picture = findViewById(R.id.pictureID);
         cameraButton = findViewById(R.id.camera_button);
+        save = findViewById(R.id.button);
+        et = findViewById(R.id.editTextText);
+        FirebaseApp.initializeApp(this);
+        auth = FirebaseAuth.getInstance();
 
         cameraButton.setOnClickListener(v -> openCameraActivity());
+        save.setOnClickListener(v -> saveToFirebase());
+
+
     }
+    private void saveToFirebase() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+               Log.d("SAVE_DEBUG", "Starting saveToFirebase...");
+
+        auth = FirebaseAuth.getInstance();
+       Log.d("FIRESTORE_INIT", "Firestore instance: " + db);
+
+
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            Log.e("AUTH_DEBUG", "No user is signed in.");
+            Toast.makeText(this, "User is not signed in. Please sign in first.", Toast.LENGTH_SHORT).show();
+            return;
+        }else{
+            Log.d("SAVE_DEBUG", "user is signed in.");
+        }
+
+        String userId = currentUser.getUid();
+        Log.d("SAVE_DEBUG", "User ID: " + userId);
+
+
+        String customText = et.getText().toString();
+        if (customText.isEmpty()) {
+            Log.e("INPUT_DEBUG", "Custom text is empty.");
+            Toast.makeText(this, "Please enter valid data!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("name", currentUser.getDisplayName());
+        userData.put("email", currentUser.getEmail());
+        userData.put("phoneNumber", currentUser.getPhoneNumber());
+        userData.put("profilePic",currentUser.getPhotoUrl());
+        userData.put("customData", customText);
+        Log.d("SAVE_DEBUG", "Prepared userData: " + userData);
+        Log.d("SAVE_DEBUG", "Reached Firestore set() method");
+        CountDownLatch latch = new CountDownLatch(1); // Create a latch with count 1
+
+        db.collection(userId).document("Personal Info").set(userData)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("SAVE_DEBUG", "Document successfully written!");
+                        Toast.makeText(this, "Document saved successfully!", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("SAVE_DEBUG", "Error writing document: " + e.getMessage());
+                        Toast.makeText(this, "Error saving document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+
+
+        Log.d("SAVE_DEBUG", "After calling .set()");
+    }
+
+
 
     private void openCameraActivity() {
         //Toast.makeText(this, "HERE", Toast.LENGTH_SHORT).show();

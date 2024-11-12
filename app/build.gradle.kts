@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services") // Google Services Plugin
+    id("com.google.gms.google-services")    // Google Services Plugin
 }
 
 android {
@@ -77,8 +77,13 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-auth")
+    implementation ("com.google.firebase:firebase-auth:23.1.0")
+    implementation ("com.google.firebase:firebase-firestore")
+    implementation ("com.google.firebase:firebase-core:21.1.1") // Replace with the latest version
+
+    // Add Firestore here
 
     // Google Play Services for Authentication
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 }
+
