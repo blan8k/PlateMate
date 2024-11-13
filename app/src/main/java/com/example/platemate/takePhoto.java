@@ -253,7 +253,11 @@ public class takePhoto extends BaseActivity {
     }
 
     private void displayCapturedImage() {
-        setContentView(R.layout.takephoto);
+        //setContentView(R.layout.takephoto);
+        setUpNavigationDrawer(R.layout.base);
+        // Inflate History-specific layout into the content frame
+        getLayoutInflater().inflate(R.layout.takephoto, findViewById(R.id.content_frame));
+
         picture = findViewById(R.id.pictureID);
         picture.setImageURI(photoUri);
         imageFile = new File(photoFile.getAbsolutePath());
