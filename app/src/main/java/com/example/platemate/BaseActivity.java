@@ -19,7 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class BaseActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     protected DrawerLayout drawerLayout;
 
@@ -39,8 +39,7 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
 
         // Set up ActionBar toggle
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -53,18 +52,20 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
             // Skip redirection if this is a navigation action
             return;
         }
-        if (!(this instanceof takePhoto) && savedInstanceState == null ) {
+        if (!(this instanceof takePhoto) && savedInstanceState == null) {
             first();
         }
 
     }
-    private void first(){
+
+    private void first() {
         Intent intent = new Intent(this, takePhoto.class);
         intent.putExtra("FROM_NAVIGATION", true); // Add a flag to prevent repeated redirection
         startActivity(intent);
         finish();
 
     }
+
     // This method must be overridden in child activities to provide their specific layout
     protected int getContentViewId() {
         throw new UnsupportedOperationException("You must override getContentViewId() in child classes.");
@@ -73,21 +74,23 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
+        if (id == R.id.takePic) {
             Intent intent = new Intent(this, takePhoto.class);
             intent.putExtra("FROM_NAVIGATION", true); // Add flag to prevent redirection loop
             startActivity(intent);
 
-        } else if (id == R.id.nav_settings) {
+        } else if (id == R.id.pastHistory) {
             Intent intent = new Intent(this, History.class);
             intent.putExtra("FROM_NAVIGATION", true); // Add flag to prevent redirection loop
             startActivity(intent);
-            } else if (id == R.id.nav_about) {
+        } else if(id == R.id.daily){
+            Intent intent = new Intent(this, Daily.class);
+            intent.putExtra("FROM_NAVIGATION", true); // Add flag to prevent redirection loop
+            startActivity(intent);
+        }else if (id == R.id.loggingOut) {
             FirebaseAuth.getInstance().signOut();
-            GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(getString(R.string.default_web_client_id)) // Use your web client ID
-                    .requestEmail()
-                    .build();
+            GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.default_web_client_id)) // Use your web client ID
+                    .requestEmail().build();
 
             // Build GoogleSignInClient
             GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
@@ -121,6 +124,7 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
         }
         return super.onOptionsItemSelected(item);
     }
+
     protected void setUpNavigationDrawer(int layoutResID) {
         // Set the activity's layout
         setContentView(layoutResID);
@@ -131,8 +135,7 @@ public class BaseActivity extends AppCompatActivity  implements NavigationView.O
 
         // Set up the navigation drawer
         drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = findViewById(R.id.navigation_view);

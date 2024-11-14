@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_home"
+        android:id="@+id/takePic"
         android:icon="@drawable/photo"
         android:title="Take Picture" />
     <item
-        android:id="@+id/nav_settings"
+        android:id="@+id/daily"
+        android:icon="@drawable/daily"
+        android:title="Today" />
+    <item
+        android:id="@+id/pastHistory"
         android:icon="@drawable/history"
         android:title="History" />
     <item
-        android:id="@+id/nav_about"
+        android:id="@+id/loggingOut"
         android:icon="@drawable/exit"
         android:title="Log Out" />
 </menu>

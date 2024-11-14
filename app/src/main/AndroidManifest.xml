@@ -46,8 +46,10 @@
         <activity android:name=".BaseActivity"
             android:exported="false"/>
         <activity android:name=".History"
+            android:exported="false"
+            />
+        <activity android:name=".Daily"
             android:exported="false"/>
-
     </application>
 
 
