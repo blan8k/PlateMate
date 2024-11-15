@@ -80,11 +80,12 @@ public class takePhoto extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.takephoto);
-        setUpNavigationDrawer(R.layout.base);
+        //setUpNavigationDrawer(R.layout.base);
 
         // Inflate History-specific layout into the content frame
-        getLayoutInflater().inflate(R.layout.takephoto, findViewById(R.id.content_frame));
-
+        //getLayoutInflater().inflate(R.layout.takephoto, findViewById(R.id.content_frame));
+        setUpNavigationDrawer(R.layout.takephoto);
+        setupNavigationHeader();
         picture = findViewById(R.id.pictureID);
         cameraButton = findViewById(R.id.camera_button);
         save = findViewById(R.id.button);

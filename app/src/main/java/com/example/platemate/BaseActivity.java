@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,7 +20,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.squareup.picasso.Picasso;
+
+import org.w3c.dom.Text;
 
 public class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -34,9 +42,8 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar); // IMPORTANT: This sets the Toolbar as the ActionBar
 
-        // Initialize NavigationView
-        NavigationView navigationView = findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
+
+
 
         // Set up ActionBar toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
@@ -57,6 +64,28 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         }
 
     }
+    protected void setupNavigationHeader() {
+        NavigationView navigationView = findViewById(R.id.navigation_view);
+        View headerView = navigationView.getHeaderView(0);
+
+        ImageView pfp = headerView.findViewById(R.id.userPFP);
+        TextView intro = headerView.findViewById(R.id.intro);
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+
+
+            intro.setText("Welcome " + user.getDisplayName() + "!");
+            String photoUrl = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
+
+                Picasso.get()
+                        .load(photoUrl)
+                              // Use an error image if loading fails
+                        .into(pfp);
+
+
+    }
+
 
     private void first() {
         Intent intent = new Intent(this, takePhoto.class);
@@ -127,7 +156,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     protected void setUpNavigationDrawer(int layoutResID) {
         // Set the activity's layout
-        setContentView(layoutResID);
+        setContentView(R.layout.base);
 
         // Initialize the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -138,6 +167,8 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+        getLayoutInflater().inflate(layoutResID, findViewById(R.id.content_frame));
+
         NavigationView navigationView = findViewById(R.id.navigation_view);
         if (navigationView == null) {
             Log.e("BaseActivity", "NavigationView is null. Check your layout.");

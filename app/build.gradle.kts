@@ -80,6 +80,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:23.1.0")
     implementation ("com.google.firebase:firebase-firestore")
     implementation ("com.google.firebase:firebase-core:21.1.1") // Replace with the latest version
+    implementation ("com.squareup.picasso:picasso:2.71828")
 
     // Add Firestore here
 

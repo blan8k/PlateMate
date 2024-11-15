@@ -9,6 +9,7 @@
 
     <ImageView
         android:layout_width="72dp"
+        android:id="@+id/userPFP"
         android:layout_height="72dp"
         android:src="@drawable/ic_launcher_foreground"
         android:contentDescription="User Icon" />
@@ -17,6 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Welcome, User!"
-        android:textColor="@android:color/white"
+        android:id="@+id/intro"
+        android:textColor="@android:color/black"
         android:textSize="18sp" />
 </LinearLayout>
