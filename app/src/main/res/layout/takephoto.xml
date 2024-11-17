@@ -33,7 +33,7 @@
         android:id="@+id/scrollView2"
         android:layout_width="300dp"
         android:layout_height="100dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="100dp"
         app:layout_constraintBottom_toTopOf="@+id/camera_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -59,27 +59,17 @@ If you have specific brand information or additional details, I can refine the e
             android:textSize="20dp" />
     </ScrollView>
 
-    <!-- EditText for user input -->
-    <EditText
-        android:id="@+id/editTextText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="250dp"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Name"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.079"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Button to trigger saving or other actions -->
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        android:text="Button"
-        app:layout_constraintBottom_toTopOf="@+id/scrollView2"
-        app:layout_constraintStart_toEndOf="@+id/editTextText" />
+        android:layout_marginStart="160dp"
+        android:layout_marginEnd="160dp"
+        android:layout_marginBottom="21dp"
+        android:text="Save"
+        app:layout_constraintBottom_toTopOf="@+id/camera_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

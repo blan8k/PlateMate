@@ -89,7 +89,7 @@ public class takePhoto extends BaseActivity {
         picture = findViewById(R.id.pictureID);
         cameraButton = findViewById(R.id.camera_button);
         save = findViewById(R.id.button);
-        et = findViewById(R.id.editTextText);
+
         FirebaseApp.initializeApp(this);
         auth = FirebaseAuth.getInstance();
 
@@ -119,20 +119,11 @@ public class takePhoto extends BaseActivity {
         String userId = currentUser.getUid();
         Log.d("SAVE_DEBUG", "User ID: " + userId);
 
-
-        String customText = et.getText().toString();
-        if (customText.isEmpty()) {
-            Log.e("INPUT_DEBUG", "Custom text is empty.");
-            Toast.makeText(this, "Please enter valid data!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         Map<String, Object> userData = new HashMap<>();
         userData.put("name", currentUser.getDisplayName());
         userData.put("email", currentUser.getEmail());
         userData.put("phoneNumber", currentUser.getPhoneNumber());
         userData.put("profilePic",currentUser.getPhotoUrl());
-        userData.put("customData", customText);
         Log.d("SAVE_DEBUG", "Prepared userData: " + userData);
         Log.d("SAVE_DEBUG", "Reached Firestore set() method");
         CountDownLatch latch = new CountDownLatch(1); // Create a latch with count 1
