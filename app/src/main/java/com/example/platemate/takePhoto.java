@@ -235,7 +235,6 @@ public class takePhoto extends BaseActivity {
         setupNavigationHeader();
         picture = findViewById(R.id.pictureID);
         picture.setImageURI(photoUri);
-        imageFile = new File(photoFile.getAbsolutePath());
         picture = findViewById(R.id.pictureID);
         cameraButton = findViewById(R.id.camera_button);
         desc = findViewById(R.id.description);
