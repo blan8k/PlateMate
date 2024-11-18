@@ -1,7 +1,6 @@
 package com.example.platemate;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.AspectRatio;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
@@ -12,8 +11,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.drawerlayout.widget.DrawerLayout;
-
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -32,7 +29,6 @@ import android.os.Environment;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,7 +55,6 @@ public class takePhoto extends BaseActivity {
     private ImageView picture;
     private Uri photoUri;
     private Button cameraButton;
-    private File imageFile;
     private TextView desc;
     private String apiKey = BuildConfig.OPENAI_API_KEY;
     private String model;
@@ -69,21 +64,13 @@ public class takePhoto extends BaseActivity {
     private String timeStamp;
     private String imageFileName;
     private FirebaseAuth auth;
-    private FirebaseFirestore db;
     private Button save;
-    private EditText et;
-    private DrawerLayout drawerLayout;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.takephoto);
-        //setUpNavigationDrawer(R.layout.base);
-
-        // Inflate History-specific layout into the content frame
-        //getLayoutInflater().inflate(R.layout.takephoto, findViewById(R.id.content_frame));
         setUpNavigationDrawer(R.layout.takephoto);
         setupNavigationHeader();
         picture = findViewById(R.id.pictureID);
@@ -145,7 +132,6 @@ public class takePhoto extends BaseActivity {
 
 
     private void openCameraActivity() {
-        //Toast.makeText(this, "HERE", Toast.LENGTH_SHORT).show();
         setContentView(R.layout.activity_camera);
 
         previewView = findViewById(R.id.previewView);
