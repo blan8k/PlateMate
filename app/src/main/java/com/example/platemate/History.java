@@ -8,6 +8,5 @@ public class History extends BaseActivity{
         super.onCreate(savedInstanceState);
         setUpNavigationDrawer(R.layout.historypage);
         setupNavigationHeader();
-
     }
 }
