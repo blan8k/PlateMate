@@ -87,7 +87,7 @@ public class takePhoto extends BaseActivity {
 
     }
     private void saveToFirebase() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        /*FirebaseFirestore db = FirebaseFirestore.getInstance();
                Log.d("SAVE_DEBUG", "Starting saveToFirebase...");
 
         auth = FirebaseAuth.getInstance();
@@ -113,7 +113,6 @@ public class takePhoto extends BaseActivity {
         userData.put("profilePic",currentUser.getPhotoUrl());
         Log.d("SAVE_DEBUG", "Prepared userData: " + userData);
         Log.d("SAVE_DEBUG", "Reached Firestore set() method");
-        CountDownLatch latch = new CountDownLatch(1); // Create a latch with count 1
 
         db.collection(userId).document("Personal Info").set(userData)
                     .addOnSuccessListener(aVoid -> {
@@ -126,7 +125,18 @@ public class takePhoto extends BaseActivity {
                     });
 
 
-        Log.d("SAVE_DEBUG", "After calling .set()");
+        Log.d("SAVE_DEBUG", "After calling .set()");*/
+        desc = findViewById(R.id.description);
+        String whole = desc.getText().toString();
+        String calories = whole.substring(whole.indexOf("Calories"), whole.indexOf("kcal")  + 4);
+        String protein = whole.substring(whole.indexOf("Protein"), whole.indexOf("g", whole.indexOf("Protein"))  + 1);
+        String carbohydrates = whole.substring(whole.indexOf("Carbohydrates"), whole.indexOf("g", whole.indexOf("Carbohydrates"))  + 1);
+        String sugars = whole.substring(whole.indexOf("Sugars"), whole.indexOf("g", whole.indexOf("Sugars"))  + 1);
+        String fats = whole.substring(whole.indexOf("Fats"), whole.indexOf("g", whole.indexOf("Fats"))  + 1);
+        String saturated = whole.substring(whole.indexOf("Saturated Fat"), whole.indexOf("g", whole.indexOf("Saturated Fat"))  + 1);
+
+
+        Toast.makeText(this, protein, Toast.LENGTH_SHORT).show();
     }
 
 
