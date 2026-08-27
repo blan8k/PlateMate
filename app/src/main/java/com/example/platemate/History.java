@@ -8,6 +8,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,7 +19,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -26,8 +27,13 @@ import java.util.Map;
 public class History extends BaseActivity{
     private EditText goalCaloriesInput;
     private TextView trendSummary;
+    private TextView latestRecordedDate;
+    private TextView latestRecordedCalories;
+    private TextView sevenDayAverage;
+    private TextView trendDirection;
     private ListView historyList;
     private List<Double> dailyTotals = new ArrayList<>();
+    private List<String> dayLabels = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +42,10 @@ public class History extends BaseActivity{
         setupNavigationHeader();
         goalCaloriesInput = findViewById(R.id.goalCaloriesInput);
         trendSummary = findViewById(R.id.trendSummary);
+        latestRecordedDate = findViewById(R.id.latestRecordedDate);
+        latestRecordedCalories = findViewById(R.id.latestRecordedCalories);
+        sevenDayAverage = findViewById(R.id.sevenDayAverage);
+        trendDirection = findViewById(R.id.trendDirection);
         historyList = findViewById(R.id.historyList);
         Button predictButton = findViewById(R.id.predictButton);
 
@@ -73,6 +83,7 @@ public class History extends BaseActivity{
                         totalsByDay.put(day, totalsByDay.getOrDefault(day, 0.0) + calories);
                     }
 
+                    dayLabels = new ArrayList<>(totalsByDay.keySet());
                     dailyTotals = new ArrayList<>(totalsByDay.values());
                     List<String> rows = new ArrayList<>();
                     for (Map.Entry<String, Double> entry : totalsByDay.entrySet()) {
@@ -83,10 +94,60 @@ public class History extends BaseActivity{
                         rows.add("No historical nutrition data yet.");
                     }
                     historyList.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, rows));
+                    updateSnapshotMetrics();
                     updateTrendMessage();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load history: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void updateSnapshotMetrics() {
+        if (dailyTotals.isEmpty() || dayLabels.isEmpty()) {
+            latestRecordedDate.setText("Last recorded day: --");
+            latestRecordedCalories.setText("Last recorded calories: --");
+            sevenDayAverage.setText("7-day average: --");
+            trendDirection.setText("Trend direction: --");
+            trendDirection.setTextColor(ContextCompat.getColor(this, R.color.trend_flat));
+            return;
+        }
+
+        int lastIndex = dailyTotals.size() - 1;
+        double latestCalories = dailyTotals.get(lastIndex);
+        String latestDay = dayLabels.get(lastIndex);
+
+        int start = Math.max(0, dailyTotals.size() - 7);
+        List<Double> recentValues = dailyTotals.subList(start, dailyTotals.size());
+        double rollingAverage = average(recentValues);
+
+        latestRecordedDate.setText(String.format(Locale.getDefault(), "Last recorded day: %s", latestDay));
+        latestRecordedCalories.setText(String.format(
+                Locale.getDefault(),
+                "Last recorded calories: %.0f kcal",
+                latestCalories
+        ));
+        sevenDayAverage.setText(String.format(
+                Locale.getDefault(),
+                "7-day average: %.0f kcal/day",
+                rollingAverage
+        ));
+
+        if (dailyTotals.size() < 2) {
+            trendDirection.setText("Trend direction: Need more data");
+            trendDirection.setTextColor(ContextCompat.getColor(this, R.color.trend_flat));
+            return;
+        }
+
+        double slope = linearRegression(dailyTotals)[0];
+        if (slope > 5) {
+            trendDirection.setText(String.format(Locale.getDefault(), "Trend direction: Rising (%.1f kcal/day)", slope));
+            trendDirection.setTextColor(ContextCompat.getColor(this, R.color.trend_up));
+        } else if (slope < -5) {
+            trendDirection.setText(String.format(Locale.getDefault(), "Trend direction: Falling (%.1f kcal/day)", slope));
+            trendDirection.setTextColor(ContextCompat.getColor(this, R.color.trend_down));
+        } else {
+            trendDirection.setText(String.format(Locale.getDefault(), "Trend direction: Stable (%.1f kcal/day)", slope));
+            trendDirection.setTextColor(ContextCompat.getColor(this, R.color.trend_flat));
+        }
     }
 
     private void updateTrendMessage() {

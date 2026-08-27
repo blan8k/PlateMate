@@ -2,4 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="primary">#4F46E5</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="surface_background">#F8FAFC</color>
+    <color name="surface_card">#FFFFFFFF</color>
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="trend_up">#15803D</color>
+    <color name="trend_down">#B91C1C</color>
+    <color name="trend_flat">#0369A1</color>
 </resources>
