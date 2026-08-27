@@ -39,15 +39,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-//YES
 public class takePhoto extends BaseActivity {
     private PreviewView previewView;
     private ImageCapture imageCapture;
@@ -65,6 +73,8 @@ public class takePhoto extends BaseActivity {
     private String imageFileName;
     private FirebaseAuth auth;
     private Button save;
+    private NutritionData latestNutrition;
+    private String latestAnalysisText;
 
 
 
@@ -87,56 +97,48 @@ public class takePhoto extends BaseActivity {
 
     }
     private void saveToFirebase() {
-        /*FirebaseFirestore db = FirebaseFirestore.getInstance();
-               Log.d("SAVE_DEBUG", "Starting saveToFirebase...");
-
-        auth = FirebaseAuth.getInstance();
-       Log.d("FIRESTORE_INIT", "Firestore instance: " + db);
-
-
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
-            Log.e("AUTH_DEBUG", "No user is signed in.");
             Toast.makeText(this, "User is not signed in. Please sign in first.", Toast.LENGTH_SHORT).show();
             return;
-        }else{
-            Log.d("SAVE_DEBUG", "user is signed in.");
         }
 
-        String userId = currentUser.getUid();
-        Log.d("SAVE_DEBUG", "User ID: " + userId);
+        if (latestNutrition == null || latestNutrition.calories == null) {
+            Toast.makeText(this, "Take and analyze a food photo first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("name", currentUser.getDisplayName());
-        userData.put("email", currentUser.getEmail());
-        userData.put("phoneNumber", currentUser.getPhoneNumber());
-        userData.put("profilePic",currentUser.getPhotoUrl());
-        Log.d("SAVE_DEBUG", "Prepared userData: " + userData);
-        Log.d("SAVE_DEBUG", "Reached Firestore set() method");
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            Toast.makeText(this, "Image upload is not complete yet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        db.collection(userId).document("Personal Info").set(userData)
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d("SAVE_DEBUG", "Document successfully written!");
-                        Toast.makeText(this, "Document saved successfully!", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("SAVE_DEBUG", "Error writing document: " + e.getMessage());
-                        Toast.makeText(this, "Error saving document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+        Map<String, Object> mealData = new HashMap<>();
+        mealData.put("timestamp", new Date());
+        mealData.put("imageUrl", imageUrl);
+        mealData.put("analysisText", latestAnalysisText);
+        if (latestNutrition.summary != null) {
+            mealData.put("summary", latestNutrition.summary);
+        }
+        if (latestNutrition.confidence != null) {
+            mealData.put("confidence", latestNutrition.confidence);
+        }
+        addMetric(mealData, "calories", latestNutrition.calories);
+        addMetric(mealData, "protein", latestNutrition.protein);
+        addMetric(mealData, "carbohydrates", latestNutrition.carbohydrates);
+        addMetric(mealData, "sugars", latestNutrition.sugars);
+        addMetric(mealData, "fats", latestNutrition.fats);
+        addMetric(mealData, "saturatedFat", latestNutrition.saturatedFat);
 
-
-        Log.d("SAVE_DEBUG", "After calling .set()");*/
-        desc = findViewById(R.id.description);
-        String whole = desc.getText().toString();
-        String calories = whole.substring(whole.indexOf("Calories"), whole.indexOf("kcal")  + 4);
-        String protein = whole.substring(whole.indexOf("Protein"), whole.indexOf("g", whole.indexOf("Protein"))  + 1);
-        String carbohydrates = whole.substring(whole.indexOf("Carbohydrates"), whole.indexOf("g", whole.indexOf("Carbohydrates"))  + 1);
-        String sugars = whole.substring(whole.indexOf("Sugars"), whole.indexOf("g", whole.indexOf("Sugars"))  + 1);
-        String fats = whole.substring(whole.indexOf("Fats"), whole.indexOf("g", whole.indexOf("Fats"))  + 1);
-        String saturated = whole.substring(whole.indexOf("Saturated Fat"), whole.indexOf("g", whole.indexOf("Saturated Fat"))  + 1);
-
-
-        Toast.makeText(this, protein, Toast.LENGTH_SHORT).show();
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(currentUser.getUid())
+                .collection("meal_entries")
+                .add(mealData)
+                .addOnSuccessListener(documentReference ->
+                        Toast.makeText(this, "Meal saved to history.", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to save meal: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
 
@@ -250,57 +252,13 @@ public class takePhoto extends BaseActivity {
         desc = findViewById(R.id.description);
         desc.setMovementMethod(new ScrollingMovementMethod());
         model = "gpt-4o-mini";
-        prompt = "You are a nutrition assistant. Analyze food images provided by the user. Identify the food items, estimate portion sizes, and calculate nutritional content. Present the results clearly with headings, bullet points, calories, macronutrients (protein, carbs, fats), and a confidence level. If no food items are detected, respond with: \"⚠\uFE0F No food items detected. Please provide a clear image of food.\"\n";
-        //prompt = "Describe the image in few words.";
-        //uploadImageToFirebase(photoUri);
+        prompt = "You are a nutrition assistant. Analyze the food image and return valid JSON only."
+                + " Use this schema: {\"summary\":\"short description\",\"confidence\":\"low|medium|high\","
+                + "\"nutrition\":{\"calories\":number,\"protein\":number,\"carbohydrates\":number,"
+                + "\"sugars\":number,\"fats\":number,\"saturatedFat\":number}}."
+                + " Use estimates per visible serving. Do not include markdown or code fences.";
         cameraButton.setOnClickListener(v -> openCameraActivity());
-        Log.d("MainActivity", "Firebase Image URL GOJO SATORU1: " + imageUrl);
-        RequestBody requestBody = OpenAIRequest.createRequestBody(model, prompt, imageUrl);
-        OpenAIService service = RetrofitClient.getClient().create(OpenAIService.class);
-        String auth = "Bearer " + apiKey;
-//        Call<ResponseBody> call = service.createCompletion(auth, requestBody);
-//
-//
-//        call.enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                if (response.isSuccessful()) {
-//                    Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
-//                    try {
-//
-//                        String responseBody = response.body().string();
-//                        System.out.println("Response: " + responseBody);
-//                        try {
-//                            JSONObject jsonObject = new JSONObject(responseBody);
-//                            JSONArray choices = jsonObject.getJSONArray("choices");
-//                            JSONObject firstChoice = choices.getJSONObject(0);
-//                            JSONObject message = firstChoice.getJSONObject("message");
-//                            String assistantResponse = message.getString("content");
-//                            desc.setText(assistantResponse);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                } else {
-//                    try {
-//
-//                        String errorBody = response.errorBody().string();
-//                        Log.e("OpenAIError", "Error Body: INFINITE VOID123 " + errorBody);
-//                    } catch (IOException e) {
-//                        Log.e("OpenAIError", "Failed to read error body: CHAINSAW " + e.getMessage(), e);
-//                    }
-//                    Toast.makeText(MainActivity.this, "FAIL", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                t.printStackTrace();
-//            }
-//        });
+        analyzeImageWithOpenAI();
 
     }
     private void uploadImageToFirebase(Uri fileUri) {
@@ -322,7 +280,7 @@ public class takePhoto extends BaseActivity {
             imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                 imageUrl = uri.toString();
                 displayCapturedImage();
-                Log.d("MainActivity", "Image uploaded successfully. ABCDEFG URL: " + imageUrl);
+                Log.d("MainActivity", "Image uploaded successfully URL: " + imageUrl);
             }).addOnFailureListener(e -> {
                 Log.e("MainActivity", "Failed to get download URL", e);
                 Toast.makeText(this, "Failed to get download URL", Toast.LENGTH_SHORT).show();
@@ -393,4 +351,161 @@ public class takePhoto extends BaseActivity {
 
 
 
+    private void analyzeImageWithOpenAI() {
+        if (apiKey == null || apiKey.isEmpty()) {
+            desc.setText("OpenAI API key is missing. Add OPENAI_API_KEY to gradle.properties.");
+            return;
+        }
+
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            desc.setText("Image URL missing. Please retake the photo.");
+            return;
+        }
+
+        desc.setText("Analyzing image...");
+        RequestBody requestBody = OpenAIRequest.createRequestBody(model, prompt, imageUrl);
+        OpenAIService service = RetrofitClient.getClient().create(OpenAIService.class);
+        String authHeader = "Bearer " + apiKey;
+        Call<ResponseBody> call = service.createCompletion(authHeader, requestBody);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    String message = "OpenAI request failed.";
+                    try {
+                        if (response.errorBody() != null) {
+                            message = response.errorBody().string();
+                        }
+                    } catch (IOException ignored) {
+                    }
+                    desc.setText("Failed to analyze image.\n" + message);
+                    return;
+                }
+
+                try {
+                    String responseBody = response.body().string();
+                    NutritionData nutritionData = parseNutritionResponse(responseBody);
+                    latestNutrition = nutritionData;
+                    latestAnalysisText = nutritionData.rawText;
+                    desc.setText(formatNutritionForDisplay(nutritionData));
+                } catch (Exception e) {
+                    desc.setText("Failed to parse nutrition response.");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                desc.setText("Network error while analyzing image.");
+            }
+        });
+    }
+
+    private NutritionData parseNutritionResponse(String responseBody) throws JSONException {
+        JSONObject root = new JSONObject(responseBody);
+        JSONArray choices = root.getJSONArray("choices");
+        JSONObject firstChoice = choices.getJSONObject(0);
+        JSONObject message = firstChoice.getJSONObject("message");
+        String assistantResponse = message.getString("content");
+        String normalized = normalizeJsonCandidate(assistantResponse);
+        NutritionData data = new NutritionData();
+        data.rawText = assistantResponse;
+
+        try {
+            JSONObject aiJson = new JSONObject(normalized);
+            data.summary = aiJson.optString("summary", null);
+            data.confidence = aiJson.optString("confidence", null);
+            JSONObject nutrition = aiJson.optJSONObject("nutrition");
+            if (nutrition != null) {
+                data.calories = readDouble(nutrition, "calories");
+                data.protein = readDouble(nutrition, "protein");
+                data.carbohydrates = readDouble(nutrition, "carbohydrates");
+                data.sugars = readDouble(nutrition, "sugars");
+                data.fats = readDouble(nutrition, "fats");
+                data.saturatedFat = readDouble(nutrition, "saturatedFat");
+            }
+        } catch (JSONException parseError) {
+            data.calories = extractMetric(assistantResponse, "calories");
+            data.protein = extractMetric(assistantResponse, "protein");
+            data.carbohydrates = extractMetric(assistantResponse, "carbohydrates");
+            data.sugars = extractMetric(assistantResponse, "sugars");
+            data.fats = extractMetric(assistantResponse, "fats");
+            data.saturatedFat = extractMetric(assistantResponse, "saturated\\s*fat");
+        }
+
+        return data;
+    }
+
+    private String formatNutritionForDisplay(NutritionData data) {
+        StringBuilder builder = new StringBuilder();
+        if (data.summary != null && !data.summary.isEmpty()) {
+            builder.append("Food: ").append(data.summary).append("\n");
+        }
+        if (data.confidence != null && !data.confidence.isEmpty()) {
+            builder.append("Confidence: ").append(data.confidence).append("\n\n");
+        }
+        builder.append("Estimated Nutrition (per serving)\n");
+        builder.append("Calories: ").append(formatValue(data.calories, "kcal")).append("\n");
+        builder.append("Protein: ").append(formatValue(data.protein, "g")).append("\n");
+        builder.append("Carbohydrates: ").append(formatValue(data.carbohydrates, "g")).append("\n");
+        builder.append("Sugars: ").append(formatValue(data.sugars, "g")).append("\n");
+        builder.append("Fats: ").append(formatValue(data.fats, "g")).append("\n");
+        builder.append("Saturated Fat: ").append(formatValue(data.saturatedFat, "g")).append("\n");
+        return builder.toString();
+    }
+
+    private String formatValue(Double value, String unit) {
+        if (value == null) {
+            return "N/A";
+        }
+        return String.format("%.1f %s", value, unit);
+    }
+
+    private Double extractMetric(String text, String keyPattern) {
+        Pattern pattern = Pattern.compile(keyPattern + "[^\\d]*([\\d]+(?:\\.\\d+)?)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            try {
+                return Double.parseDouble(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return null;
+    }
+
+    private String normalizeJsonCandidate(String content) {
+        String cleaned = content.trim();
+        if (cleaned.startsWith("```")) {
+            cleaned = cleaned.replace("```json", "").replace("```", "").trim();
+        }
+        return cleaned;
+    }
+
+    private Double readDouble(JSONObject object, String key) {
+        if (!object.has(key)) {
+            return null;
+        }
+        try {
+            return object.getDouble(key);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    private void addMetric(Map<String, Object> data, String key, Double value) {
+        if (value != null) {
+            data.put(key, value);
+        }
+    }
+
+    private static class NutritionData {
+        String summary;
+        String confidence;
+        Double calories;
+        Double protein;
+        Double carbohydrates;
+        Double sugars;
+        Double fats;
+        Double saturatedFat;
+        String rawText;
+    }
 }

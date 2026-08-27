@@ -37,7 +37,8 @@ public class OpenAIRequest {
         if (input == null) {
             return "";
         }
-        return input.replace("\"", "\\\"")
+        return input.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
                 .replace("\n", "\\n")
                 .replace("\r", "\\r");
     }
